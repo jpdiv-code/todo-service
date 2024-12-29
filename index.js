@@ -25,14 +25,6 @@ const tasks = [
     deadline: Date.now() + WEEK_IN_MS,
     status: "IN_PROGRESS",
   },
-  {
-    id: 3,
-    title: "Homework_03",
-    body: "Complete the task of the Third lesson.",
-    createdAt: Date.now(),
-    deadline: Date.now() + WEEK_IN_MS,
-    status: "TODO",
-  },
   // ... остальные задачи ...
 ];
 
