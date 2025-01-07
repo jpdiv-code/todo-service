@@ -1,76 +1,102 @@
-Первое домашнее задание.
+# Простейший API для управления задачами
 
-Сервис должен хранить у себя в памяти список задач (прямо в оперативке, прямо в каком-нибудь массиве).
+Список задач (тип Task) хранится на сервере в оперативной памяти.
 
-Каждая задача имеет ЗАГОЛОВОК (title), ТЕКСТ (body), КРАЙНИЙ СРОК (deadline) и СТАТУС (status).
-
-(эндпоинт - конечная точка)
-(роут - маршрут)
-(
-всё это названия для: example-domain.org/tasks/32/status <- вот этого вот пути после /
-)
-
-Сервер должен реализовывать следующие эндпоинты (они же роуты)
-Все запросы должны ПРИНИМАТЬ и ОТВЕЧАТЬ json-ом
-
----
-
----
-
----
-
-POST /tasks
-При запросе на этот эндпоинт, мы должны создавать новую задачу (task)
-у нас в памяти, с указанными ЗАГОЛОВКОМ, ТЕКСТОМ и КРАЙНИМ СРОКОМ
-(
-статус будет "НЕВЫПОЛНЕНО"
-крайний срок должен быть опционален
-)
-
-Отвечать должен НОМЕРОМ только что созданной задачи.
-
-Пример входящих данных для этого запроса:
-{
-"title": "Купить чипсы",
-"body": "Купить чипсы со вкусом краба",
-"deadline": 1733677748 // UTC timestamp. Такой можно получить вызвов Date.now()
+```typescript
+type Task = {
+    id: number,
+    title: string,
+    body: string,
+    // ? means that this field is optional
+    deadline?: number, // UTC timestamp
+    status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
 }
-Пример ответа:
-{
-"id": 0 // id == он де идентификатор
-}
+```
 
 ---
 
----
+Эндпоинты.
 
----
+* POST /tasks
+    
+    ```typescript
+    type RequestBody = {
+        title?: string;
+        body?: string;
+        deadline?: number;
+    }
+    ```
 
-GET /tasks
-Должен возвращать список задач
+    Запрос на этот эндпоинт создаст и сохранит новую задачу.</br>
+    При отсутствии ```req.body.title``` следует использовать стандартное значение - "No Title".</br>
+    При отсутствии ```req.body.body``` следует использовать стандартное значение - пустую строку.</br>
 
----
+    Для новой задачи должен быть создан уникальный цифровой идентификатор (```id```).
 
----
+    ```typescript
+    type Response = {
+        id: number; // created task id
+    }
+    ```
 
----
+* GET /tasks
 
-POST /task/:id
-Должен ОБНОВИТЬ заголовок и/или текст и/или дедлайн и/или статус указанной задачи
-(номер задачи указывается прямо в пути как :id)
+    ```typescript
+    type RequestBody = {
+        status?: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
+    }
+    ```
 
-Пример запроса:
-POST /task/0
-{
-"status": "DONE"
-}
-Такой запрос должен обновить статус задачи с номером 0 на новый статус "DONE"
+    Запрос на этот эндпоинт ответит списком задач.</br>
+    При отсутствии ```req.body.status``` ответом должен быть список всех задач. При наличии ```req.body.status``` ответом должен быть список задач с соответствущим ```status```.
 
----
+    ```typescript
+    type Response = [
+        {
+            id: number;
+            title: string;
+            body: string;
+            deadline?: number;
+            status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+        }
+    ];
+    ```
 
----
+* GET /task/:id
 
----
+    Запрос на этот эндпоинт ответит задачей с идентификатором соответствующим запрашиваемому (```req.params.id```).
 
-DELETE /task/:id
-Должен удалить задачу с указанным номером
+    ```typescript
+    type Response = {
+        id: number;
+        title: string;
+        body: string;
+        deadline?: number;
+        status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+    }
+    ```
+
+* PUT /task/:id
+
+    ```typescript
+    type RequestBody = {
+        title?: string;
+        body?: string;
+        deadline?: number;
+        status?: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+    };
+    ```
+
+    Запрос на этот эндпоинт обновит задачу с соответствующим идентификатором (```req.params.id```) новыми полями.
+
+    ```typescript
+    type Response = 'OK';
+    ```
+
+* DELETE /task/:id
+
+    Запрос на этот эндпоинт удалит задачу с соответствующим идентификатором (```req.params.id```).
+
+    ```typescript
+    type Response = 'OK';
+    ```
